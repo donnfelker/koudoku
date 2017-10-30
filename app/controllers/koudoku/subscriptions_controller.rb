@@ -114,7 +114,7 @@ module Koudoku
     def create
       @subscription = ::Subscription.new(subscription_params)
       @subscription.subscription_owner = @owner
-      @subscription.coupon_code = session[:koudoku_coupon_code]
+      @subscription.coupon = ::Coupon.find_by_code(session[:koudoku_coupon_code])
       
       if @subscription.save
         flash[:notice] = after_new_subscription_message
