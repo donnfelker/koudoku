@@ -7,7 +7,7 @@ module Koudoku::Subscription
     # client-side after storing the credit card information.
     attr_accessor :credit_card_token
 
-    belongs_to :plan
+    belongs_to :plan, optional: true
 
     # update details.
     before_save :processing!
