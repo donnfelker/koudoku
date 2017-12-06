@@ -120,7 +120,11 @@ module Koudoku
         flash[:notice] = after_new_subscription_message
         redirect_to after_new_subscription_path 
       else
-        flash[:error] = I18n.t('koudoku.failure.problem_processing_transaction')
+        if @subscription && @subscription.errors && @subscription.errors.full_messages
+          flash[:error] = @subscription.errors.full_messages.to_sentence
+        else
+          flash[:error] = I18n.t('koudoku.failure.problem_processing_transaction')
+        end
         render :new
       end
     end
