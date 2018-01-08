@@ -102,6 +102,7 @@ module Koudoku
       else
         @subscription = ::Subscription.new
         @subscription.plan = ::Plan.find(params[:plan])
+        @subscription.coupon = ::Coupon.find_by_code(session[:koudoku_coupon_code])
       end
     end
 
