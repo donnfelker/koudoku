@@ -26,6 +26,7 @@ module Koudoku::Coupon
         max_redemptions: max_redemptions,
         percent_off: percent_off,
         amount_off: amount_off,
+        currency: 'USD'
       }
       coupon_hash[:redeem_by] = redeem_by.strftime('%s') if redeem_by.present?
       coupon_hash[:metadata] = metadata if metadata.present?
