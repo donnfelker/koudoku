@@ -28,6 +28,7 @@ module Koudoku::Coupon
         amount_off: amount_off,
       }
       coupon_hash[:redeem_by] = redeem_by.strftime('%s') if redeem_by.present?
+      coupon_hash[:metadata] = metadata if metadata.present?
       
       Stripe::Coupon.create(coupon_hash)
     end
