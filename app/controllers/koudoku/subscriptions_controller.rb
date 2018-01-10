@@ -3,7 +3,7 @@ module Koudoku
     before_action :load_owner
     before_action :show_existing_subscription, only: [:index, :new, :create], unless: :no_owner?
     before_action :load_subscription, only: [:show, :cancel, :edit, :update]
-    before_action :load_plans, only: [:index, :edit]
+    before_action :load_plans, only: [:index, :edit, :update]
 
     def load_plans
       @plans = ::Plan.order(:display_order)
@@ -141,15 +141,21 @@ module Koudoku
     end
 
     def edit
+      @subscription.coupon = ::Coupon.find_by_code(session[:koudoku_coupon_code]) if @subscription.present?
     end
 
     def update
+      @subscription.coupon = ::Coupon.find_by_code(session[:koudoku_coupon_code]) if @subscription != nil
       if @subscription.update_attributes(subscription_params)
         flash[:notice] = I18n.t('koudoku.confirmations.subscription_updated')
         redirect_to owner_subscription_path(@owner, @subscription)
       else
-        flash[:error] = I18n.t('koudoku.failure.problem_processing_transaction')
-        render :edit
+        if @subscription && @subscription.errors && @subscription.errors.full_messages
+          flash[:error] = @subscription.errors.full_messages.to_sentence
+        else
+          flash[:error] = I18n.t('koudoku.failure.problem_processing_transaction')
+        end
+        redirect_to edit
       end
     end
 

@@ -33,8 +33,37 @@ module Koudoku::Subscription
             prepare_for_downgrade if downgrading?
             prepare_for_upgrade if upgrading?
 
+            if coupon.present?
+              prepare_for_coupon_application
+              customer.coupon = coupon.code # Must apply the coupon as a code, not the object
+
+              begin
+                customer.save
+              rescue Stripe::CardError => card_error
+                errors[:base] << card_error.message
+                card_was_declined
+                throw(:abort)
+              rescue Stripe::InvalidRequestError, Stripe::StripeError => e
+                errors[:base] << e.message
+                error_saving_customer(e)
+                throw(:abort)
+              end
+
+              finalize_coupon_application!
+            end
+
             # update the package level with stripe.
-            customer.update_subscription(:plan => self.plan.stripe_id, :prorate => Koudoku.prorate)
+            begin
+              customer.update_subscription(:plan => self.plan.stripe_id, :prorate => Koudoku.prorate)
+            rescue Stripe::CardError => card_error
+              errors[:base] << card_error.message
+              card_was_declined
+              throw(:abort)
+            rescue Stripe::InvalidRequestError, Stripe::StripeError => e
+              errors[:base] << e.message
+              error_updating_subscription(e)
+              throw(:abort)
+            end
 
             finalize_downgrade! if downgrading?
             finalize_upgrade! if upgrading?
@@ -131,8 +160,8 @@ module Koudoku::Subscription
       end
     end
   end
-  
-  
+
+
   def describe_difference(plan_to_describe)
     if plan.nil?
       if persisted?
@@ -206,6 +235,12 @@ module Koudoku::Subscription
   def prepare_for_card_update
   end
 
+  def prepare_for_coupon_application
+  end
+
+  def finalize_coupon_application!
+  end
+
   def finalize_plan_change!
   end
 
@@ -238,6 +273,12 @@ module Koudoku::Subscription
   end
 
   def charge_disputed
+  end
+
+  def error_updating_subscription(e)
+  end
+
+  def error_saving_customer(e)
   end
 
 end
