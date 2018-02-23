@@ -19,6 +19,9 @@ module Koudoku
   mattr_accessor :prorate
   @@prorate = true
 
+  mattr_accessor :cancel_at_period_end
+  @@cancel_at_period_end = false
+
   
   @@layout = nil
   

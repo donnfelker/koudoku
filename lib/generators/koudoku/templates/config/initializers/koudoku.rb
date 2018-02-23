@@ -7,6 +7,12 @@ Koudoku.setup do |config|
   # config.prorate = false # Default is true, set to false to disable prorating subscriptions
   # config.free_trial_length = 30
 
+  # This will leave the subscription enabled until the billing period.
+  # Users will be able to update their subscription to re-enable their subscription if they decide to keep it.
+  # This keeps the plan record intact and the actual cancellation is handled by the webhook via the
+  # customer.subscription.deleted webhook event.
+  # config.cancel_at_period_end = true
+
   # Specify layout you want to use for the subscription pages, default is application
   config.layout = 'application'
   

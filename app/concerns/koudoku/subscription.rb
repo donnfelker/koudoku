@@ -73,9 +73,6 @@ module Koudoku::Subscription
 
             prepare_for_cancelation
 
-            # Remove the current pricing.
-            self.current_price = nil
-
             # delete the subscription.
             customer.cancel_subscription
 
@@ -143,7 +140,39 @@ module Koudoku::Subscription
 
         finalize_plan_change!
 
-      # if they're updating their credit card details.
+      elsif changing_cancellation_period?
+
+        customer = Stripe::Customer.retrieve(self.stripe_id)
+
+        if cancel_at_period_end?
+
+          prepare_for_cancellation_period_change
+          # Cancel at period end is true
+          subscription = customer.cancel_subscription(at_period_end: true)
+          self.current_period_end = Time.at(subscription.current_period_end).to_datetime
+
+          finalize_cancellation_period_change
+
+        else
+
+          prepare_for_subscription_reactivation
+
+          # Update the subscription so that it renews.
+          # https://stripe.com/docs/subscriptions/canceling-pausing#reactivating-canceled-subscriptions
+          subscription = customer.subscription
+          subscription.items = [{
+                                    id: subscription.items.data[0].id,
+                                    plan: subscription.items.data[0].plan.id
+                                }]
+          subscription.save
+
+          self.cancel_at_period_end = false
+          self.current_period_end = nil
+
+          finalize_subscription_reactivation
+
+        end
+
       elsif self.credit_card_token.present?
 
         prepare_for_card_update
@@ -182,6 +211,29 @@ module Koudoku::Subscription
     end
   end
 
+  def cancel(force = false)
+
+    if Koudoku.cancel_at_period_end && !force
+      # Leave the subscription intact, but set the subscription to cancel at the billing period end.
+      # To use this, you will need webhooks set up in your app, otherwise your cancellation will never
+      # process as the actual cancellation occurs when Stripe calls your webhook, informing you that
+      # the subscription is canceled with the 'customer.subscription.deleted' webhook event.
+      self.cancel_at_period_end = true
+    else
+      self.plan_id = nil
+      self.cancel_at_period_end = false
+      self.current_period_end = nil
+
+      # Remove the current pricing.
+      self.current_price = nil
+    end
+
+  end
+
+  def reactivate
+    self.cancel_at_period_end = false
+  end
+
   # Pretty sure this wouldn't conflict with anything someone would put in their model
   def subscription_owner
     # Return whatever we belong to.
@@ -206,6 +258,10 @@ module Koudoku::Subscription
 
   def changing_plans?
     plan_id_changed?
+  end
+
+  def changing_cancellation_period?
+    Koudoku.cancel_at_period_end && cancel_at_period_end_changed?
   end
 
   def downgrading?
@@ -236,6 +292,18 @@ module Koudoku::Subscription
   end
 
   def prepare_for_coupon_application
+  end
+
+  def prepare_for_cancellation_period_change
+  end
+
+  def prepare_for_subscription_reactivation
+  end
+
+  def finalize_subscription_reactivation
+  end
+
+  def finalize_cancellation_period_change
   end
 
   def finalize_coupon_application!

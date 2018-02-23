@@ -35,7 +35,8 @@ StripeEvent.configure do |events|
     stripe_id = event.data.object['customer']
     subscription = ::Subscription.find_by_stripe_id(stripe_id)
     if subscription.present?
-      subscription.subscription_owner.try(:cancel)
+      subscription.cancel(force = true)
+      subscription.save
     else
       Rails.logger.warn "Received webhook call for stripe customer.subscription.deleted event but subscription does not exist for stripe ID #{stripe_id}"
     end

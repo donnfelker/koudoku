@@ -135,7 +135,7 @@ module Koudoku
 
     def cancel
       flash[:notice] = I18n.t('koudoku.confirmations.subscription_cancelled')
-      @subscription.plan_id = nil
+      @subscription.cancel
       @subscription.save
       redirect_to owner_subscription_path(@owner, @subscription)
     end
