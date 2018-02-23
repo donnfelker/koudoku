@@ -8,6 +8,7 @@ en:
       subscription_cancelled: "You've successfully cancelled your subscription."
       subscription_updated: "You've successfully updated your subscription."
       subscription_upgraded: "You've been successfully upgraded."
+      subscription_reactivated: "You've successfully reactivated your subscription."
     failure:
       problem_processing_transaction: "There was a problem processing this transaction."
       unauthorized: "Unauthorized"

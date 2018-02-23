@@ -5,6 +5,7 @@ Koudoku::Engine.routes.draw do
     resources :subscriptions do
       member do
         post :cancel
+        post :reactivate
       end
     end
   end

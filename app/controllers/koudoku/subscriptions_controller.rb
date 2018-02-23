@@ -2,7 +2,7 @@ module Koudoku
   class SubscriptionsController < ApplicationController
     before_action :load_owner
     before_action :show_existing_subscription, only: [:index, :new, :create], unless: :no_owner?
-    before_action :load_subscription, only: [:show, :cancel, :edit, :update]
+    before_action :load_subscription, only: [:show, :cancel, :edit, :update, :reactivate]
     before_action :load_plans, only: [:index, :edit, :update]
 
     def load_plans
@@ -136,6 +136,13 @@ module Koudoku
     def cancel
       flash[:notice] = I18n.t('koudoku.confirmations.subscription_cancelled')
       @subscription.cancel
+      @subscription.save
+      redirect_to owner_subscription_path(@owner, @subscription)
+    end
+
+    def reactivate
+      flash[:notice] = I18n.t('koudoku.confirmations.subscription_reactivated')
+      @subscription.reactivate
       @subscription.save
       redirect_to owner_subscription_path(@owner, @subscription)
     end
