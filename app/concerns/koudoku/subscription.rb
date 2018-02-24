@@ -159,11 +159,12 @@ module Koudoku::Subscription
 
           # Update the subscription so that it renews.
           # https://stripe.com/docs/subscriptions/canceling-pausing#reactivating-canceled-subscriptions
-          subscription = customer.subscription
+          subscription = customer.subscriptions.data[0]
           subscription.items = [{
                                     id: subscription.items.data[0].id,
                                     plan: subscription.items.data[0].plan.id
                                 }]
+
           subscription.save
 
           self.cancel_at_period_end = false
