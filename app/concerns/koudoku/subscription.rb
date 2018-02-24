@@ -73,8 +73,12 @@ module Koudoku::Subscription
 
             prepare_for_cancelation
 
-            # delete the subscription.
-            customer.cancel_subscription
+            begin
+              # delete the subscription.
+              customer.cancel_subscription
+            rescue Stripe::InvalidRequestError, Stripe::StripeError => e
+              Rails.logger.error e.message
+            end
 
             finalize_cancelation!
 
