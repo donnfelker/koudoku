@@ -33,6 +33,7 @@ en:
       save_billing_info: "Save Billing Information"
       upgrade_account: "Upgrade Your Account"
       update_payment_information: "Update Your Payment Information"
+      processing_message: "Processing ..."
     social_proof:
       testimonial1:
         person: "Person at Place"
