@@ -12,6 +12,9 @@ module Koudoku
   
   mattr_accessor :stripe_secret_key
   @@stripe_secret_key = nil
+
+  mattr_accessor :stripe_signing_secret
+  @@stripe_signing_secret = nil
   
   mattr_accessor :free_trial_length
   @@free_trial_length = nil
@@ -42,6 +45,9 @@ module Koudoku
     
     # Configure the Stripe gem.
     Stripe.api_key = stripe_secret_key
+
+    # Configure Stripe Event
+    StripeEvent.signing_secret = stripe_signing_secret
   end
   
   # e.g. :users
